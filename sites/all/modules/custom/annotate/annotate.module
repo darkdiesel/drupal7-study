@@ -1,0 +1,41 @@
+<?php
+/**
+ * @file
+ * Позволяет пользователям добавлять в ноды персональные аннотации.
+ *
+ * При выводе ноды добавляет текстовое поле, которое позволяет
+ * аутентифицированным пользователям вставлять примечания.
+ */
+/**
+ * Реализация hook_menu().
+ */
+
+function annotate_menu() {
+  $items['admin/config/annotate'] = [
+    'title' => 'Node annotation',
+    // Аннотирование ноды
+    'description' => 'Adjust node annotation options.',
+    // Настройка параметров аннотирования ноды
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    // обратный вызов страницы
+    'access arguments' => ['administer site configuration'],
+    // аргументы доступа
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  ];
+  $items['admin/config/annotate/settings'] = [
+    'title' => 'Annotation settings',
+    // Параметры аннотации
+    'description' => 'Change how annotations behave.',
+    // Изменение поведеня аннотаций
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['annotate_admin_settings'],
+    // аргументы страницы
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'annotate.admin.inc',
+  ];
+  return $items;
+}
