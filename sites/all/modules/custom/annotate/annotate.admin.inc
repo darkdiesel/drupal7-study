@@ -28,6 +28,31 @@ types to make author-specific notes.'),
     // Для этих типов контента будут доступны текстовые
     // поля, предназначенные для авторских заметок
   ];
+  $form['annotate_deletion'] = [
+    '#type' => 'radios',
+    '#title' => t('Annotations will be deleted'),
+    // Аннотации будут удалены
+    '#description' => t('Select a method for deleting annotations.'),
+    // Выберите метод для удаления аннотаций
+    '#options' => [
+      t('Never'), // Никогда
+      t('Randomly'), // Случайным образом
+      t('After 30 days') // Спустя 30 дней
+    ],
+    '#default_value' => variable_get('annotate_deletion', 0)
+    // По умолчанию Never
+  ];
+  $form['annotate_limit_per_node'] = [
+    '#type' => 'textfield',
+    '#title' => t('Annotations per node'),
+    // Аннотаций в ноде
+    '#description' => t('Enter the maximum number of annotations allowed per
+node (0 for no limit).'),
+    // Введите максимальное количество аннотаций, допустимое для ноды
+    // (0 — неограниченное).
+    '#default_value' => variable_get('annotate_limit_per_node', 1),
+    '#size' => 3,
+  ];
 
   $form['#submit'][] = 'annotate_admin_settings_submit';
 
@@ -39,8 +64,7 @@ types to make author-specific notes.'),
  */
 function annotate_admin_settings_submit($form, $form_state) {
   // Цикл по всем флажкам типов контента, имеющихся на форме.
-  foreach ($form_state['values']['annotate_node_types'] as $key => $value)
-  {
+  foreach ($form_state['values']['annotate_node_types'] as $key => $value) {
     // Если флажок для типа контента сброшен, проверяем,
     // имеется ли у данного типа контента связанное с ним поле аннотации,
     // с помощью функции field_info_instance. Если имеется,
@@ -49,32 +73,40 @@ function annotate_admin_settings_submit($form, $form_state) {
       $instance = field_info_instance('node', 'annotation', $key);
       if (!empty($instance)) {
         field_delete_instance($instance);
-        watchdog("Annotation", "Deleted annotation field from content type: ".$key);
+        watchdog("Annotation", "Deleted annotation field from content type: " . $key);
       } // Конец варианта, когда аннотация существует, и ее необходимо удалить.
-    } else {
+    }
+    else {
       // Если флажок для типа контента установлен, проверяем, связано ли с данным
       // типом контента поле. Если нет, добавим в тип контента поле аннотации.
       $instance = field_info_instance('node', 'annotation', $key);
       if (empty($instance)) {
-        $instance = array(
+        $instance = [
           'field_name' => 'annotation',
           'entity_type' => 'node',
           'bundle' => $key,
           'label' => t('Annotation'),
           'widget_type' => 'text_textarea_with_summary',
-          'settings' => array('display_summary' => TRUE),
-          'display' => array(
-            'default' => array(
+          'settings' => ['display_summary' => TRUE],
+          'display' => [
+            'default' => [
               'type' => 'text_default',
-            ),
-            'teaser' => array(
+            ],
+            'teaser' => [
               'type' => 'text_summary_or_trimmed',
-            ),
-          ),
-        );
+            ],
+          ],
+        ];
         $instance = field_create_instance($instance);
-        watchdog("Annotation", "Added annotation field to content type: ".$key);
+        watchdog("Annotation", "Added annotation field to content type: " . $key);
       } // Конец варианта, когда поля аннотации нет, и оно добавляется.
     } // Конец оператора if.
   } // Конец оператора foreach.
+}
+
+function annotate_admin_settings_validate($form, $form_state) {
+  $limit = $form_state['values']['annotate_limit_per_node'];
+  if (!is_numeric($limit)) {
+    form_set_error('annotate_limit_per_node', t('Please enter a number.'));
+  }
 }
