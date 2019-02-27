@@ -39,3 +39,17 @@ function annotate_menu() {
   ];
   return $items;
 }
+
+/**
+ * Реализация hook_node_load()
+ */
+function annotate_node_load($nodes, $types) {
+  global $user;
+  // Проверка, является ли лицо, просматривающее ноду, автором.
+  // Если нет, аннотация скрывается.
+  foreach ($nodes as $node) {
+    if ($user->uid != $node->uid) {
+      unset($node->annotation);
+    }
+  }
+}
