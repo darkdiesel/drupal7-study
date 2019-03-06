@@ -5,8 +5,11 @@ engine = phptemplate
 
 ; Regions
 regions[header] = Header
+regions[sidebar_first] = Sidebar First
+regions[sidebar_second] = Sidebar Second
 regions[content] = Content
 regions[footer] = Footer
+regions[highlighted] = Highlighted
 
 ; Css
 stylesheets[all][] = assets/css/style.min.css
