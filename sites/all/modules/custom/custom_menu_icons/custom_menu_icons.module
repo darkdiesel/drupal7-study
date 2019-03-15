@@ -1,0 +1,157 @@
+<?php
+/**
+ * @file
+ */
+
+function custom_menu_icons_form_alter(&$form, &$form_state, $form_id) {
+
+  if ($form_id == 'menu_edit_item' && isset($form_state['build_info']['args'][1]['menu_name'])) {
+    $menus = variable_get('custom_menu_icons_menus', 0);
+
+    if (isset($menus) && $menus[$form_state['build_info']['args'][1]['menu_name']] !== 0) {
+      if (isset($form['mlid']['#value'])) {
+        $options = unserialize(db_query('SELECT options FROM {menu_links} WHERE mlid = :mlid', array(':mlid' => $form['mlid']['#value']))->fetchField());
+      }
+
+      if (!isset($options) || !isset($options['custom_menu_icon'])) {
+        $options = [
+          'custom_menu_icon' => [
+            'enable' => NULL,
+            'type' => NULL,
+            'icon' => NULL,
+            'image' => NULL,
+            'path' => NULL,
+          ],
+        ];
+      }
+
+      $form['custom_icon'] = [
+        '#type' => 'fieldset',
+        '#title' => t('Link icon settings'),
+      ];
+
+      $form['custom_icon']['use_custom_icon_logo'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use an icon'),
+        '#default_value' => $options['custom_menu_icon']['enable'],
+        '#tree' => FALSE,
+        '#description' => t('Check this if you want this icon to be used.'),
+      );
+
+      $form['custom_icon']['type'] = [
+        '#type' => 'radios',
+        '#title' => t('Icon Type'),
+        '#description' => t('Set '),
+        '#options' => [
+          t('None'),
+          t('Icon'),
+          t('Image'),
+        ],
+        '#default_value' => $options['custom_menu_icon']['type'],
+      ];
+      $form['custom_icon']['type']['#states'] = array(
+        'visible' => array (
+          ':input[name="use_custom_icon_logo"]' => array('checked' => TRUE),
+        ),
+      );
+
+      $icons = variable_get('custom_menu_icons_icons', []);
+
+      $icons = explode("\r\n", $icons);
+      $menu_icons = [];
+
+      foreach ($icons as $icon) {
+        $ex_icon = explode("|", $icon);
+        if (is_array($ex_icon) && count($ex_icon) > 1) {
+          $menu_icons[$ex_icon[0]] = $ex_icon[1];
+        } elseif (count($ex_icon) == 1){
+          $menu_icons[$ex_icon[0]] = $ex_icon[0];
+        }
+      }
+
+      $form['custom_icon']['icon'] = [
+        '#type' => 'select',
+        '#title' => t('Icon'),
+        '#description' => t("Select icon from list. You can setup it's in <a href='/admin/config/custom_menu_icons/settings'>here</a>"),
+        '#options' => $menu_icons,
+        '#default_value' => $options['custom_menu_icon']['icon'],
+      ];
+      $form['custom_icon']['icon']['#states'] = array(
+        'visible' => array (
+          ':input[name="use_custom_icon_logo"]' => array('checked' => TRUE),
+        ),
+      );
+
+      $form['custom_icon']['image'] = [
+        '#type' => 'file',
+        '#title' => t('Image'),
+        '#description' => t("Upload icon as image. Allowed extensions: gif png jpg jpeg"),
+        '#default_value' => 0,
+        '#upload_location' => 'public://custom_menu_icons/',
+        '#upload_validators' => [
+          'file_validate_extensions' => ['gif png jpg jpeg'],
+          // Pass the maximum file size in bytes
+          //'file_validate_size' => array(MAX_FILE_SIZE*1024*1024),
+        ],
+      ];
+      $form['custom_icon']['image']['#states'] = array(
+        'visible' => array (
+          ':input[name="use_custom_icon_logo"]' => array('checked' => TRUE),
+        ),
+      );
+
+      $form['custom_icon']['icon_path'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Path to the icon'),
+        '#default_value' => (isset($options['custom_icon']['path']) ? $options['custom_icon']['path'] : variable_get('custom_menu_icons_default_icon', drupal_get_path('module', 'custom_menu_icons') . '/images/default_icon.png')),
+        '#description' => t('The path to the image you would like to use as a background image for this menu item.'),
+      );
+      $form['custom_icon']['icon_path']['#states'] = array(
+        'visible' => array (
+          ':input[name="use_custom_icon_logo"]' => array('checked' => TRUE),
+        ),
+      );
+
+      $form['#submit'][] = 'custom_menu_icons_form_alter_menu_link_submit';
+    }
+  }
+}
+
+function custom_menu_icons_form_alter_menu_link_submit($form, $form_state) {
+  foreach ($form_state['values'] as $value) {
+
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function custom_menu_icons_menu() {
+  $items['admin/config/custom_menu_icons'] = [
+    'title' => 'Custom Menu Icons',
+    // Аннотирование ноды
+    'description' => 'Add menu icons',
+    // Настройка параметров аннотирования ноды
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    // обратный вызов страницы
+    'access arguments' => ['administer site configuration'],
+    // аргументы доступа
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  ];
+  $items['admin/config/custom_menu_icons/settings'] = [
+    'title' => 'Menu Icons settings',
+    // Параметры аннотации
+    'description' => 'Change menu icons',
+    // Изменение поведеня аннотаций
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['custom_menu_icons_admin_settings'],
+    // аргументы страницы
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'custom_menu_icons.admin.inc',
+  ];
+  return $items;
+}

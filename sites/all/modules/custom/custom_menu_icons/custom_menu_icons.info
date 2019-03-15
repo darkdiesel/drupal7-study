@@ -1,0 +1,13 @@
+name = Custom Menu Icons
+description = "Allows users to add icons to menu"
+dependencies[] = menu
+dependencies[] = image
+package = Other
+core = 7.x
+
+configure=admin/config/custom_menu_icons/settings
+
+files[] = custom_menu_icons.install
+files[] = custom_menu_icons.module
+
+php = 5.2
