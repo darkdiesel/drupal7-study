@@ -4,7 +4,20 @@
  * Cleanup custom_menu_icons variables and menu link options.
  */
 
+/**
+ * Implements hook_uninstall().
+ */
 function custom_menu_icons_uninstall(){
   variable_del('custom_menu_icons_menus');
   variable_del('custom_menu_icons_icons');
+}
+
+/**
+ * Implements hook_install().
+ */
+function custom_menu_icons_install() {
+  db_update('system')
+    ->fields(array('weight' => 10))
+    ->condition('name', 'custom_menu_icons', '=')
+    ->execute();
 }
