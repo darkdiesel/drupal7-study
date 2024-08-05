@@ -27,19 +27,23 @@
         "composer/semver": "^1.4",
         "cweagans/composer-patches": "^1.7",
         "drupal-composer/preserve-paths": "^0.1.6",
-        "drupal/admin_devel": "*",
-        "drupal/backup_migrate": "*",
-        "drupal/ckeditor": "*",
+        "drupal/admin_menu": "^3.0@RC",
+        "drupal/backup_migrate": "^3.10",
+        "drupal/ckeditor": "^1.23",
         "drupal/composer_autoloader": "^1.0",
-        "drupal/ctools": "*",
+        "drupal/ctools": "^1.21",
         "drupal/devel": "^1.7",
         "drupal/drupal": "^7.62",
-        "drupal/file_entity": "*",
-        "drupal/imce": "*",
-        "drupal/libraries": "*",
-        "drupal/media": "*",
-        "drupal/module_filter": "*",
-        "drupal/views": "*",
+        "drupal/file_entity": "^2.38",
+        "drupal/fubik": "^1.26",
+        "drupal/imce": "^2.0",
+        "drupal/libraries": "^2.5",
+        "drupal/media": "^4.5",
+        "drupal/module_filter": "^2.3",
+        "drupal/rubik": "^4.4",
+        "drupal/tao": "^3.1",
+        "drupal/views": "^3.29",
+        "drush/drush": "^8.0",
         "symfony/filesystem": "~2.7 || ^3",
         "webflo/drupal-finder": "^1.2.1"
     },
@@ -96,8 +100,5 @@
         "preserve-paths": [
             "web/sites"
         ]
-    },
-    "require-dev": {
-        "drush/drush": "7.*"
     }
 }
